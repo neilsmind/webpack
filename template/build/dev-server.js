@@ -1,26 +1,24 @@
 require('./check-versions')()
 
-var config = require('../config')
-if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV)
-}
+process.env.NODE_ENV = process.env.NODE_ENV || 'production'
+process.env.BUILD_ENV = process.env.BUILD_ENV || process.env.NODE_ENV
+
+var config = require('../config')[process.env.BUILD_ENV]
 
 var opn = require('opn')
 var path = require('path')
 var express = require('express')
 var webpack = require('webpack')
 var proxyMiddleware = require('http-proxy-middleware')
-var webpackConfig = {{#if_or unit e2e}}process.env.NODE_ENV === 'testing'
-  ? require('./webpack.prod.conf')
-  : {{/if_or}}require('./webpack.dev.conf')
+var webpackConfig = require(`./webpack.${process.env.NODE_ENV}.conf`)
 
 // default port where dev server listens for incoming traffic
-var port = process.env.PORT || config.dev.port
+var port = process.env.PORT || config.port
 // automatically open browser, if not set will be false
-var autoOpenBrowser = !!config.dev.autoOpenBrowser
+var autoOpenBrowser = !!config.autoOpenBrowser
 // Define HTTP proxies to your custom API backend
 // https://github.com/chimurai/http-proxy-middleware
-var proxyTable = config.dev.proxyTable
+var proxyTable = config.proxyTable
 
 var app = express()
 var compiler = webpack(webpackConfig)
@@ -61,7 +59,7 @@ app.use(devMiddleware)
 app.use(hotMiddleware)
 
 // serve pure static assets
-var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
+var staticPath = path.posix.join(config.assetsPublicPath, config.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
 
 var uri = 'http://localhost:' + port
@@ -74,8 +72,7 @@ var readyPromise = new Promise(resolve => {
 console.log('> Starting dev server...')
 devMiddleware.waitUntilValid(() => {
   console.log('> Listening at ' + uri + '\n')
-  // when env is testing, don't need open it
-  if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
+  if (autoOpenBrowser) {
     opn(uri)
   }
   _resolve()

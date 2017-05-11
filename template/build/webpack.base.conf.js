@@ -1,6 +1,6 @@
 var path = require('path')
 var utils = require('./utils')
-var config = require('../config')
+var config = require('../config')[process.env.BUILD_ENV]
 var vueLoaderConfig = require('./vue-loader.conf')
 
 function resolve (dir) {
@@ -12,24 +12,19 @@ module.exports = {
     app: './src/main.js'
   },
   output: {
-    path: config.build.assetsRoot,
+    path: config.assetsRoot,
     filename: '[name].js',
-    publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
-      : config.dev.assetsPublicPath
+    publicPath: config.assetsPublicPath
   },
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
-      {{#if_eq build "standalone"}}
       'vue$': 'vue/dist/vue.esm.js',
-      {{/if_eq}}
       '@': resolve('src')
     }
   },
   module: {
     rules: [
-      {{#lint}}
       {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
@@ -39,7 +34,6 @@ module.exports = {
           formatter: require('eslint-friendly-formatter')
         }
       },
-      {{/lint}}
       {
         test: /\.vue$/,
         loader: 'vue-loader',

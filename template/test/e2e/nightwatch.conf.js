@@ -1,5 +1,7 @@
+/* eslint-disable */
+
 require('babel-register')
-var config = require('../../config')
+var config = require('../../config')[process.env.BUILD_ENV]
 
 // http://nightwatchjs.org/gettingstarted#settings-file
 module.exports = {
@@ -23,7 +25,7 @@ module.exports = {
       selenium_host: 'localhost',
       silent: true,
       globals: {
-        devServerURL: 'http://localhost:' + (process.env.PORT || config.dev.port)
+        devServerURL: 'http://localhost:' + (process.env.PORT || config.port)
       }
     },
 
